@@ -3,9 +3,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @SuppressWarnings("serial")
 public class SocketClient extends JFrame implements ActionListener, Runnable {
@@ -30,17 +33,23 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
 
         textArea.setBackground(new Color(0, 0, 0));
 
-/*
-         JMenu helpMenu = new JMenu("Help");
+
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem howToUse = new JMenuItem("How-To"); //I added this -JC
         JMenuItem update = new JMenuItem("Update Information");
         JMenuItem connect_List = new JMenuItem("Visitor List");
 
+        //I added this - JC
+        howToUse.addActionListener(e -> JOptionPane.showMessageDialog(this, "Instructions: \n1. Enter server IP\n2. Enter nickname\n3. Begin chatting!"));
+
+
         helpMenu.add(update);
         helpMenu.add(connect_List);
+        helpMenu.add(howToUse); // I added this -JC
 
         menuBar.add(helpMenu);
         setJMenuBar(menuBar);
-*/
+
         getContentPane().add(jp, "Center");
         input_Text.setText("Enter your Message:");
         input_Text.setToolTipText("Enter your Message");

@@ -6,6 +6,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class SocketServer {
     ServerSocket server;
@@ -13,6 +16,18 @@ public class SocketServer {
     InetAddress addr;
     
     ArrayList<ServerThread> list = new ArrayList<ServerThread>();
+
+    private static final Logger logger = Logger.getLogger(SocketServer.class.getName());
+
+    static {
+        try {
+            FileHandler fileHandler = new FileHandler("server.log", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(fileHandler);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public SocketServer() {
         try {
@@ -37,14 +52,20 @@ public class SocketServer {
     }
 
     public void addThread(ServerThread st) {
+
         list.add(st);
+        logger.info("Added new thread for: " + st.getName());
     }
 
     public void removeThread(ServerThread st){
+
         list.remove(st); //remove
+        logger.info("Removed thread for: " + st.getName());
+
     }
 
     public void broadCast(String message){
+        logger.info("Broadcasting a message: " + message);
         for(ServerThread st : list){
             st.pw.println(message);
         }
@@ -56,6 +77,7 @@ public class SocketServer {
 }
 
 class ServerThread extends Thread {
+    private static final Logger logger = Logger.getLogger(ServerThread.class.getName());
     SocketServer server;
     PrintWriter pw;
     String name;
@@ -73,6 +95,7 @@ class ServerThread extends Thread {
             // writing
             pw = new PrintWriter(server.sk.getOutputStream(), true);
             name = br.readLine();
+            logger.info(name + " connected.");
             server.broadCast("**["+name+"] Entered**");
 
             String data;
@@ -81,11 +104,13 @@ class ServerThread extends Thread {
                     pw.println("a");
                 }
                 server.broadCast("["+name+"] "+ data);
+                logger.info("Recieved message from " + name + ": " + data);
             }
         } catch (Exception e) {
             //Remove the current thread from the ArrayList.
             server.removeThread(this);
             server.broadCast("**["+name+"] Left**");
+            logger.info(name + " has left the chat.");
             System.out.println(server.sk.getInetAddress()+" - ["+name+"] Exit");
             System.out.println(e + "---->");
         }

@@ -1,0 +1,4 @@
+Instructions:
+Enter a Server IP.
+Enter your Nickname.
+Begin chatting!
