@@ -2,10 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -40,7 +37,7 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
         JMenuItem connect_List = new JMenuItem("Visitor List");
 
         //I added this - JC
-        howToUse.addActionListener(e -> JOptionPane.showMessageDialog(this, "Instructions: \n1. Enter server IP\n2. Enter nickname\n3. Begin chatting!"));
+        howToUse.addActionListener(e -> JOptionPane.showMessageDialog(this, "Instructions: \n1. Enter server IP\n2. Enter nickname\n3. Begin chatting!\n(Type 'weather' for a weather update!"));
 
 
         helpMenu.add(update);
@@ -112,7 +109,41 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
     @Override
     public void actionPerformed(ActionEvent e) {
         String data = input_Text.getText();
-        pw.println(data); // Send to server side
-        input_Text.setText("");
+        if (data.equals("/sendimage")) {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                sendImage(filePath);  // Call the sendImage method
+            }
+        } else {
+            pw.println(data); // Send to server side
+            input_Text.setText("");
+        }
+    }
+
+    //Added this method
+    private void sendImage(String filePath) {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(filePath);
+            OutputStream outputStream = sk.getOutputStream();
+
+            File file = new File(filePath);
+            long fileSize = file.length();
+            String fileType = filePath.substring(filePath.lastIndexOf('.') + 1);
+
+            PrintWriter writer = new PrintWriter(outputStream, true);
+            writer.println("IMAGE:" + fileType + ":" + fileSize);
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.flush();
+            fileInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
